@@ -15,6 +15,8 @@ const sterilizedInput = document.getElementById("input-sterilized");
 
 const tableBodyEl = document.getElementById("tbody");
 
+const healthyBtn = document.getElementById("healthy-btn");
+
 const petArr = [];
 
 const data1 = {
@@ -116,17 +118,19 @@ function renderTableData(petArr) {
 							<td>${pet.date.getDate()}/${
       pet.date.getMonth() + 1
     }/${pet.date.getFullYear()}</td>
-							<td><button class="btn btn-danger" onclick="deletePet('${ pet.id }')">Delete</button>
+							<td><button class="btn btn-danger" onclick="deletePet('${
+                pet.id
+              }')">Delete</button>
 							</td>`;
     tableBodyEl.appendChild(row);
   });
 }
-function deletePet(petId){
-  const isDeleted = confirm('Are you sure ?');
-  if(isDeleted){
-    for(let i=0; i< petArr.length; i++){
-      if(petId===petArr[i].id){
-        petArr.splice(i,1);
+function deletePet(petId) {
+  const isDeleted = confirm("Are you sure ?");
+  if (isDeleted) {
+    for (let i = 0; i < petArr.length; i++) {
+      if (petId === petArr[i].id) {
+        petArr.splice(i, 1);
         renderTableData(petArr);
       }
     }
@@ -184,3 +188,19 @@ function validateData(data) {
   }
   return isValidate;
 }
+
+let healthyCheck = false;
+
+healthyBtn.addEventListener("click", function () {
+  if (healthyCheck === true) {
+    const healthyPet = [];
+
+    for (let i = 0; i < petArr.length; i++) {
+      if (petArr[i].vaccinated && petArr[i].dewormed && petArr[i].sterilized) {
+        healthyPet.push(petArr[i]);
+      }
+    }
+  }
+  renderTableData(healthyBtn);
+  healthyBtn.textContent = 'Show All Pet';
+});
