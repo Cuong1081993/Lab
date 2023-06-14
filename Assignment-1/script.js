@@ -14,6 +14,8 @@ const dewormedInput = document.getElementById("input-dewormed");
 const sterilizedInput = document.getElementById("input-sterilized");
 
 const tableBodyEl = document.getElementById("tbody");
+const healthyBtn = document.getElementById("healthy-btn");
+const BMIBtn = document.getElementById("bmi-btn");
 
 const petArr = [];
 
@@ -30,6 +32,7 @@ const data1 = {
   dewormed: true,
   sterilized: true,
   date: new Date(2023, 6, 3),
+  bmi: "?",
 };
 const data2 = {
   id: "2",
@@ -44,11 +47,14 @@ const data2 = {
   dewormed: false,
   sterilized: true,
   date: new Date(2023, 8, 3),
+  bmi: "5",
 };
 petArr.push(data1);
 petArr.push(data2);
+
 console.log(petArr);
 
+// sự kiện cho nút Submit
 submitBtn.addEventListener("click", function () {
   const data = {
     id: idInput.value,
@@ -61,9 +67,11 @@ submitBtn.addEventListener("click", function () {
     breed: breedInput.value,
     vaccinated: vaccinatedInput.checked,
     date: new Date(),
+    bmi: "?",
   };
   const validate = validateData(data);
 
+  // Validate dữ liệu input
   if (validate) {
     //thêm pet vào danh sách
     petArr.push(data);
@@ -77,6 +85,7 @@ submitBtn.addEventListener("click", function () {
 renderTableData(petArr);
 
 function clearInput() {
+  // đưa dữ liệu input trở về khi chưa nhập gì
   idInput.value = "";
   nameInput.value = "";
   ageInput.value = "";
@@ -89,8 +98,12 @@ function clearInput() {
   dewormedInput.checked = false;
   sterilizedInput.checked = false;
 }
+
+// In ra ở phần tbody của table
 function renderTableData(petArr) {
+  // nếu không có đoạn code này thì dữ liệu vẽ ra bị double
   tableBodyEl.innerHTML = "";
+  // sử dụng forEach để duyệt qua từng tr và vẽ lại những gì cần hiển thị
   petArr.forEach((pet) => {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -113,25 +126,35 @@ function renderTableData(petArr) {
 							<td><i class="bi ${
                 pet.sterilized ? "bi-check-circle-fill" : "bi-x-circle-fill"
               }"></i></td>
+              <td>${pet.bmi}</td>
 							<td>${pet.date.getDate()}/${
       pet.date.getMonth() + 1
     }/${pet.date.getFullYear()}</td>
-							<td><button class="btn btn-danger" onclick="deletePet('${ pet.id }')">Delete</button>
+							<td><button class="btn btn-danger" onclick="deletePet('${
+                pet.id
+              }')">Delete</button>
 							</td>`;
     tableBodyEl.appendChild(row);
   });
 }
-function deletePet(petId){
-  const isDeleted = confirm('Are you sure ?');
-  if(isDeleted){
-    for(let i=0; i< petArr.length; i++){
-      if(petId===petArr[i].id){
-        petArr.splice(i,1);
+
+// Xóa thú cưng khỏi danh sách
+function deletePet(petId) {
+  // Xác nhận với người dùng chắc chắn xóa ?
+  const isDeleted = confirm("Are you sure ?");
+  if (isDeleted) {
+    for (let i = 0; i < petArr.length; i++) {
+      if (petId === petArr[i].id) {
+        // Xóa 1 phần tử thứ i trong mảng petArr
+        petArr.splice(i, 1);
+        // gọi hàm render để vẽ lại sau khi xóa
         renderTableData(petArr);
       }
     }
   }
 }
+
+// Validate dữ liệu nhập vào
 function validateData(data) {
   let isValidate = true;
   if (data.id.trim() === "") {
@@ -184,3 +207,53 @@ function validateData(data) {
   }
   return isValidate;
 }
+// Hiển thị thú cưng khỏe mạnh
+
+//Tạo flag để check
+let healthyCheck = true;
+
+// Gán sự kiện cho nút "Show Healthy Check"
+healthyBtn.addEventListener("click", function () {
+  // Nếu  flag = true thì hiện ra danh sách thú cưng khỏe mạnh
+  if (healthyCheck === true) {
+    const healthyPet = [];
+
+    // Vòng for để xác định những thú cưng nào khỏe mạnh
+    for (let i = 0; i < petArr.length; i++) {
+      // Nếu thú cưng thỏa mãn điều kiện if thì là khỏe mạnh
+      if (petArr[i].vaccinated && petArr[i].dewormed && petArr[i].sterilized) {
+        // add phần tử i trong mảng petArr vào mảng healthyPet
+        healthyPet.push(petArr[i]);
+      }
+    }
+    // Render lại với đối số là mảng healthyPet
+    renderTableData(healthyPet);
+    // Đổi nút thành Show All Pet
+    healthyBtn.textContent = "Show All Pet";
+
+    // cho flag = false để hiện ra Show All Pet
+    healthyCheck = false;
+
+    // Nếu flag = false thì hiện về Show All Pet
+  } else {
+    renderTableData(petArr);
+
+    // Đổi tên nút thành "Show Healthy Pet"
+    healthyBtn.textContent = "Show Healthy Pet";
+    healthyCheck = true;
+  }
+});
+
+//Tính chỉ số BMI
+BMIBtn.onclick = function () {
+  // Duyệt vòng lặp for 
+  for (let i = 0; i < petArr.length; i++) {
+    // Toán tử 3 ngôi nếu là Dog thì theo công thức 1 và Cat thì công thức 2
+    petArr[i].bmi =
+      petArr[i].type == "Dog"
+      // toFixed để làm tròn 2 chữ số thập phân
+        ? ((petArr[i].weight * 703) / petArr[i].length ** 2).toFixed(2)
+        : ((petArr[i].weight * 886) / petArr[i].length ** 2).toFixed(2);
+  }
+  renderTableData(petArr);
+};
